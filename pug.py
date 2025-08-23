@@ -10,10 +10,8 @@ import argparse
 from version import __version__
 
 
-victoriametrics_url = " http://0.0.0.0:8428/influx/write" # Adjust URL as needed
-
 """################ Settings ################"""
-directory = os.path.join(os.path.expanduser("~"), "Documents", "EVE", "Logs", "Gamelogs")
+default_directory = os.path.join(os.path.expanduser("~"), "Documents", "EVE", "Logs", "Gamelogs")
 language_list = ['english', 'russian', 'french', 'german', 'japanese', 'chinese']
 hours = 1  #filter for logs
 measurement = "ATXXI" #prefix
@@ -22,15 +20,17 @@ marker = "(combat)" # do not change
 
 # Read command line arguments
 parser = argparse.ArgumentParser(description="EVE PUG DPS Bar")
-parser.add_argument('--victoriametrics-url', type=str, required=True, help='VictoriaMetrics URL (required)')
-parser.add_argument('--username', type=str, required=True, help='Username for VictoriaMetrics (required)')
-parser.add_argument('--password', type=str, required=True, help='Password for VictoriaMetrics (required)')
+parser.add_argument('-vm', '--victoriametrics-url', type=str, required=True, help='VictoriaMetrics URL (required). Example: http://0.0.0.0:8428/influx/write')
+parser.add_argument('-u', '--username', type=str, required=True, help='Username for VictoriaMetrics (required)')
+parser.add_argument('-p', '--password', type=str, required=True, help='Password for VictoriaMetrics (required)')
+parser.add_argument('-d', '--directory', type=str, default=default_directory, help=f'EVE logs location. Default: {default_directory}')
 parser.add_argument(
+   '-l',
    '--language',
    type=str,
    default=language_list[0],
    choices=language_list,
-   help=f'Log language. Supported: {", ".join(language_list)}.'
+   help=f'Logs language. Default: {language_list[0]}'
 )
 parser.add_argument(
    '--debug',
@@ -44,7 +44,7 @@ parser.add_argument(
    default=False,
    help='Enable debug output for POST requests'
 )
-parser.add_argument("-v", "--version", action="version", version=f"%(prog)s {__version__}")
+parser.add_argument('-v', '--version', action="version", version=__version__)
 args, unknown = parser.parse_known_args()
 
 victoriametrics_url = args.victoriametrics_url
@@ -53,6 +53,7 @@ password = args.password
 language = args.language
 debug = args.debug
 debug_post = args.debug_post
+directory = args.directory
 
 """################ Templates for parsing ################"""
 
