@@ -35,7 +35,13 @@ jobs:
 
       - name: Set version
         shell: bash
-        run: echo "__version__ = '${{ github.ref_name }}'" > version.py
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "__version__ = '${{ github.ref_name }}'" > version.py
+          else
+            SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+            echo "__version__ = '${{ github.ref_name }}-${SHORT_SHA}'" > version.py
+          fi
 
       - name: Build exe with PyInstaller
         run: pyinstaller --onefile --console pug.py
