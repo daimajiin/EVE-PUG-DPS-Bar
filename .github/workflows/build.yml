@@ -12,11 +12,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - runner: windows-latest
-            ext: .exe
-          - runner: macos-latest
-            ext: ""
-    runs-on: ${{ matrix.runner }}
+          - runner: windows
+          - runner: macos
+            arch: arm64
+    runs-on: ${{ matrix.runner }}-latest
 
     steps:
       - name: Checkout repository
@@ -33,24 +32,28 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Set version
+      - name: Calculate version
         shell: bash
         run: |
           if [ "${{ github.ref_type }}" = "tag" ]; then
-            echo "__version__ = '${{ github.ref_name }}'" > version.py
+            VERSION=${{ github.ref_name }}
           else
-            SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-            echo "__version__ = '${{ github.ref_name }}-${SHORT_SHA}'" > version.py
+            VERSION=$(echo "${{ github.sha }}" | cut -c1-7)
           fi
+          echo "__version__ = '${VERSION}'" > version.py
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
 
-      - name: Build exe with PyInstaller
-        run: pyinstaller --onefile --console pug.py
+      - name: Build binary with PyInstaller
+        shell: bash
+        env:
+          ARCH: ${{ matrix.arch }}
+        run: pyinstaller --onefile --console ${ARCH:+--target-architecture $ARCH} --name "pug-${VERSION}-${{ matrix.runner }}${ARCH:+-$ARCH}" pug.py
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: pug-${{ matrix.runner }}
-          path: dist/pug${{ matrix.ext }}
+          path: dist
 
   release:
     runs-on: ubuntu-latest
@@ -69,7 +72,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            artifacts/**/pug.exe
-            artifacts/**/pug
+            artifacts/**/pug*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
