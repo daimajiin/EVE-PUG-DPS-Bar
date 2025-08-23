@@ -8,6 +8,12 @@ Pilot Utility Gauge for EVE Online
 ![pug](https://i.imgur.com/FGM3mSQ.png)
 
 ## Development
+### Install pre-commit hook
+```
+pip install pre-commit
+pre-commit install
+```
+
 ### Create and activate python venv
 ```bash
 python -m venv venv
