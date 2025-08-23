@@ -33,6 +33,10 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
+      - name: Set version
+        shell: bash
+        run: echo "__version__ = '${{ github.ref_name }}'" > version.py
+
       - name: Build exe with PyInstaller
         run: pyinstaller --onefile --console pug.py
 

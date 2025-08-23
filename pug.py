@@ -7,6 +7,7 @@ import re
 from bs4 import BeautifulSoup
 from datetime import datetime
 import argparse
+from version import __version__
 
 
 victoriametrics_url = " http://0.0.0.0:8428/influx/write" # Adjust URL as needed
@@ -43,6 +44,7 @@ parser.add_argument(
    default=False,
    help='Enable debug output for POST requests'
 )
+parser.add_argument("-v", "--version", action="version", version=f"%(prog)s {__version__}")
 args, unknown = parser.parse_known_args()
 
 victoriametrics_url = args.victoriametrics_url
