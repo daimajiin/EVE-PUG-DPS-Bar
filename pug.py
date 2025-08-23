@@ -1,3 +1,4 @@
+
 import os
 import time
 import aiohttp
@@ -5,31 +6,51 @@ import asyncio
 import re
 from bs4 import BeautifulSoup
 from datetime import datetime
+import argparse
 
-
-"""################ Prerequisites ################"""
-# pip3 install aiohttp
-# pip3 install asyncio
-# pip3 install bs4
-
-
-
-"""################ Settings ################"""
-#directory = "/Users/username/Documents/EVE/logs/Gamelogs"  #MacOS
-#directory = r"C:\Users\UserName\Documents\EVE\logs\Gamelogs"   #Windows
-directory = os.path.join(os.path.expanduser("~"), "Documents", "EVE", "Logs", "Gamelogs")
-  
 
 victoriametrics_url = " http://0.0.0.0:8428/influx/write" # Adjust URL as needed
-username = "username"
-password = "password"
+
+"""################ Settings ################"""
+directory = os.path.join(os.path.expanduser("~"), "Documents", "EVE", "Logs", "Gamelogs")
+language_list = ['english', 'russian', 'french', 'german', 'japanese', 'chinese']
 hours = 1  #filter for logs
-measurement="ATXXI" #prefix 
-language="english"   #   english   russian   french   german   japanese   chinese
-debug=False
-debug_post=True
-send_post_query=True
+measurement = "ATXXI" #prefix
+send_post_query = True
 marker = "(combat)" # do not change
+
+# Read command line arguments
+parser = argparse.ArgumentParser(description="EVE PUG DPS Bar")
+parser.add_argument('--victoriametrics-url', type=str, required=True, help='VictoriaMetrics URL (required)')
+parser.add_argument('--username', type=str, required=True, help='Username for VictoriaMetrics (required)')
+parser.add_argument('--password', type=str, required=True, help='Password for VictoriaMetrics (required)')
+parser.add_argument(
+   '--language',
+   type=str,
+   default=language_list[0],
+   choices=language_list,
+   help=f'Log language. Supported: {", ".join(language_list)}.'
+)
+parser.add_argument(
+   '--debug',
+   action='store_true',
+   default=False,
+   help='Enable debug output'
+)
+parser.add_argument(
+   '--debug-post',
+   action='store_true',
+   default=False,
+   help='Enable debug output for POST requests'
+)
+args, unknown = parser.parse_known_args()
+
+victoriametrics_url = args.victoriametrics_url
+username = args.username
+password = args.password
+language = args.language
+debug = args.debug
+debug_post = args.debug_post
 
 """################ Templates for parsing ################"""
 
@@ -650,8 +671,3 @@ def main():
     asyncio.run(async_main())
 if __name__ == "__main__":
     main()
-
-
-
-
-
