@@ -5,14 +5,21 @@ Pilot Utility Gauge for EVE Online
 
 ![pug](https://i.imgur.com/kzMOory.png)
 ![pug](https://i.imgur.com/0YqBpc0.png)
-![pug](https://i.imgur.com/FGM3mSQ.png) 
+![pug](https://i.imgur.com/FGM3mSQ.png)
 
-## Prerequisites
+## Development
+### Create and activate python venv
+```bash
+python -m venv venv
+.\venv\Scripts\Activate
 ```
-pip install aiohttp
-pip install asyncio
-pip install bs4
+
+### Install requirements
+```bash
+pip install -r requirements.txt
 ```
 
-
-
+### Freeze requirements before commit
+```bash
+pip freeze > requirements.txt
+```
