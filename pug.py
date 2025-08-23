@@ -647,7 +647,7 @@ async def process_log_line_xml(session, line, my_char):
 
 async def async_main():
     print("     ")
-    print("     VER 2.03 23.08.2025")
+    print(f"     Version: {__version__}")
     print("     ")
 
     # hours = int(input("Enter the maximum age of logs in hours (N): "))
