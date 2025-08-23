@@ -338,7 +338,10 @@ async def process_log_line_xml(session, line, my_char):
             b_tags) > DamageMask_ship else None
         pilot = b_tags[DamageMask_pilot] if len(
             b_tags) > DamageMask_pilot else None
-        ship = ship.rsplit("(", 1)[1].rstrip(")")
+        if ("(" in ship and ")" in ship):
+            ship = ship.rsplit("(", 1)[1].rstrip(")")
+        else:
+            None
         pilot = pilot.split("[", 1)[0]
         if debug:
             for b in soup.find_all("b"):
@@ -709,3 +712,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
