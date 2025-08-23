@@ -11,38 +11,48 @@ from version import __version__
 
 
 """################ Settings ################"""
-default_directory = os.path.join(os.path.expanduser("~"), "Documents", "EVE", "Logs", "Gamelogs")
-language_list = ['english', 'russian', 'french', 'german', 'japanese', 'chinese']
-hours = 1  #filter for logs
-measurement = "ATXXI" #prefix
+default_directory = os.path.join(os.path.expanduser(
+    "~"), "Documents", "EVE", "Logs", "Gamelogs")
+language_list = ['english', 'russian',
+                 'french', 'german', 'japanese', 'chinese']
+hours = 1  # filter for logs
+measurement = "ATXXI"  # prefix
 send_post_query = True
-marker = "(combat)" # do not change
+marker = "(combat)"  # do not change
 
 # Read command line arguments
 parser = argparse.ArgumentParser(description="EVE PUG DPS Bar")
-parser.add_argument('-vm', '--victoriametrics-url', type=str, required=True, help='VictoriaMetrics URL (required). Example: http://0.0.0.0:8428/influx/write')
-parser.add_argument('-u', '--username', type=str, required=True, help='Username for VictoriaMetrics (required)')
-parser.add_argument('-p', '--password', type=str, required=True, help='Password for VictoriaMetrics (required)')
-parser.add_argument('-d', '--directory', type=str, default=default_directory, help=f'EVE logs location. Default: {default_directory}')
 parser.add_argument(
-   '-l',
-   '--language',
-   type=str,
-   default=language_list[0],
-   choices=language_list,
-   help=f'Logs language. Default: {language_list[0]}'
+    '-vm',
+    '--victoriametrics-url',
+    type=str,
+    required=True,
+    help='VictoriaMetrics URL (required). Example: http://0.0.0.0:8428/influx/write')
+parser.add_argument('-u', '--username', type=str, required=True,
+                    help='Username for VictoriaMetrics (required)')
+parser.add_argument('-p', '--password', type=str, required=True,
+                    help='Password for VictoriaMetrics (required)')
+parser.add_argument('-d', '--directory', type=str, default=default_directory,
+                    help=f'EVE logs location. Default: {default_directory}')
+parser.add_argument(
+    '-l',
+    '--language',
+    type=str,
+    default=language_list[0],
+    choices=language_list,
+    help=f'Logs language. Default: {language_list[0]}'
 )
 parser.add_argument(
-   '--debug',
-   action='store_true',
-   default=False,
-   help='Enable debug output'
+    '--debug',
+    action='store_true',
+    default=False,
+    help='Enable debug output'
 )
 parser.add_argument(
-   '--debug-post',
-   action='store_true',
-   default=False,
-   help='Enable debug output for POST requests'
+    '--debug-post',
+    action='store_true',
+    default=False,
+    help='Enable debug output for POST requests'
 )
 parser.add_argument('-v', '--version', action="version", version=__version__)
 args, unknown = parser.parse_known_args()
@@ -57,8 +67,8 @@ directory = args.directory
 
 """################ Templates for parsing ################"""
 
-capNeutralizedOutColor = "<color=0xff7fffff>"  #your actions
-capNeutralizedInColor = "<color=0xffe57f7f>"   #action towards you
+capNeutralizedOutColor = "<color=0xff7fffff>"  # your actions
+capNeutralizedInColor = "<color=0xffe57f7f>"  # action towards you
 DamageRegex = r"-\s*([^-\r\n]+?)\s*-\s*"
 OtherRegex = r"-\s*([^<]+)</font>\s*$"
 DamageMask_amount = 0
@@ -89,7 +99,7 @@ _logLanguageXML = {
         'nosTaken': "> energy drained to <"
     },
     'russian': {
-        'listener': "Слушатель",        
+        'listener': "Слушатель",
         'damageOut': ">на<",
         'damageIn': ">из<",
         'armorRepairedOut': "> единиц запаса прочности брони отремонтировано <",
@@ -106,7 +116,7 @@ _logLanguageXML = {
         'nosTaken': "> энергии извлечено и передано <"
     },
     'french': {
-        'listener': "Auditeur",        
+        'listener': "Auditeur",
         'damageOut': ">à<",
         'damageIn': ">de<",
         'armorRepairedOut': "> points de blindage transférés à distance à <",
@@ -123,7 +133,7 @@ _logLanguageXML = {
         'nosTaken': "> d'énergie siphonnée en faveur de <"
     },
     'german': {
-        'listener': "Empfänger",    
+        'listener': "Empfänger",
         'damageOut': ">nach<",
         'damageIn': ">von<",
         'armorRepairedOut': "> Panzerungs-Fernreparatur zu <",
@@ -140,7 +150,7 @@ _logLanguageXML = {
         'nosTaken': "> Energie transferiert zu <"
     },
     'japanese': {
-        'listener': "傍聴者",          
+        'listener': "傍聴者",
         'damageOut': ">対象:<",
         'damageIn': ">攻撃者:<",
         'armorRepairedOut': "> remote armor repaired to <",
@@ -156,7 +166,7 @@ _logLanguageXML = {
         'capNeutralizedIn': ">のエネルギーが解放されました<",
         'nosTaken': "> エネルギードレイン 攻撃者:<"
     },
-    'chinese':{
+    'chinese': {
         'listener': "收听者",
         'damageOut': ">对<",
         'damageIn': ">来自<",
@@ -172,7 +182,7 @@ _logLanguageXML = {
         'capTransferedIn': ">远程电容传输量由<",
         'capNeutralizedIn': ">能量中和<",
         'nosTaken': ">被吸取到<"
-        } 
+    }
 }
 
 _LanguageFilter = {
@@ -192,14 +202,14 @@ _LanguageFilter = {
     'japanese': {
 
     },
-    'chinese':{
+    'chinese': {
 
-        } 
+    }
 }
 
 """################ Functions ################"""
 
-   
+
 def get_recent_logs(directory, hours):
     """Returns a list of logs that were modified no earlier than N hours ago"""
     now = time.time()
@@ -212,6 +222,7 @@ def get_recent_logs(directory, hours):
             if mtime >= threshold:
                 recent_logs.append((filepath, mtime))
     return recent_logs
+
 
 def extract_header(log_path):
     """Extracts the log header"""
@@ -229,27 +240,27 @@ def extract_header(log_path):
                 elif delimiter_count < 2:
                     ind = line.find(_logLanguageXML[language]["listener"])
                     if ind != -1:
-                        value = line[ind+10:]
+                        value = line[ind + 10:]
                         header_lines.append(value)
                     ind_2 = line.find("Session Started:")
                     if ind_2 != -1:
-                        value = line[ind_2+17:]
+                        value = line[ind_2 + 17:]
                         header_lines.append(value)
-            
+
             return ' - '.join(header_lines)
     except Exception as e:
         return f"Error: {str(e)}"
-        
-        
+
+
 async def send_influxdb_metric(session, tags, field, value):
     """ Sends a single metric in InfluxDB line protocol format to VictoriaMetrics"""
     tag_string = ','.join([f'{k}={v}' for k, v in tags.items()])
-    payload = f'{measurement},{tag_string} {field}={value}' #{timestamp_ns}'
+    payload = f'{measurement},{tag_string} {field}={value}'  # {timestamp_ns}'
     auth_tuple = aiohttp.BasicAuth(username, password)
     headers = {'Content-Type': 'text/plain'}
     try:
         if debug_post:
-            print( payload  )
+            print(payload)
         async with session.post(victoriametrics_url, data=payload, headers=headers, auth=auth_tuple) as response:
             if response.status != 204:
                 print(f"Error: ... (Status: {response.status})")
@@ -260,397 +271,418 @@ async def send_influxdb_metric(session, tags, field, value):
 def is_number(string):
     pattern = r'^-?\d+\.?\d*$'  # Integers and real numbers
     return bool(re.fullmatch(pattern, string))
-        
+
 
 async def process_log_line_xml(session, line, my_char):
     if not line.strip():
         return
     if marker in line:
-       line = line.split(marker, 1)[1]
-       line = line.strip()
-       soup = BeautifulSoup(line, "html.parser")
-       if debug:
-          print(line) 
-          print(soup)
+        line = line.split(marker, 1)[1]
+        line = line.strip()
+        soup = BeautifulSoup(line, "html.parser")
+        if debug:
+            print(line)
+            print(soup)
     else:
         return
-        
-    jsondata = { 
-       "type": [],
-       "amount": [],
-       "pilotName": [],
-       "shipType": [],
-       "weaponType": [],
+
+    jsondata = {
+        "type": [],
+        "amount": [],
+        "pilotName": [],
+        "shipType": [],
+        "weaponType": [],
     }
-    
-########## Simple Filter
+
+# Simple Filter
     for i in range(len(_LanguageFilter[language])):
-       if _LanguageFilter[language][i] in line:
-          return
-    
-    
-########## DAMAGE
+        if _LanguageFilter[language][i] in line:
+            return
+
+
+# DAMAGE
 
     if _logLanguageXML[language]["damageOut"] in line:
-       if debug:
-          print("damageOut") 
-       b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]       
-       amount = b_tags[DamageMask_amount] if len(b_tags) > DamageMask_amount else None
-       ship   = b_tags[DamageMask_ship] if len(b_tags) > DamageMask_ship else None
-       pilot  = b_tags[DamageMask_pilot] if len(b_tags) > DamageMask_pilot else None
-       ship = ship.rsplit("(", 1)[1].rstrip(")") 
-       pilot = pilot.split("[", 1)[0]
-       if debug:
-          for b in soup.find_all("b"):
-             print(b.get_text(strip=True))
-       weapon = None
-       match = re.search(DamageRegex, line)
-       if match:
-          weapon = match.group(1).strip()
-       jsondata["type"].append("damageOut")
-       jsondata["amount"].append(amount)
-       jsondata["pilotName"].append(pilot)
-       jsondata["shipType"].append(ship)
-       jsondata["weaponType"].append(weapon)
+        if debug:
+            print("damageOut")
+        b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]
+        amount = b_tags[DamageMask_amount] if len(
+            b_tags) > DamageMask_amount else None
+        ship = b_tags[DamageMask_ship] if len(
+            b_tags) > DamageMask_ship else None
+        pilot = b_tags[DamageMask_pilot] if len(
+            b_tags) > DamageMask_pilot else None
+        ship = ship.rsplit("(", 1)[1].rstrip(")")
+        pilot = pilot.split("[", 1)[0]
+        if debug:
+            for b in soup.find_all("b"):
+                print(b.get_text(strip=True))
+        weapon = None
+        match = re.search(DamageRegex, line)
+        if match:
+            weapon = match.group(1).strip()
+        jsondata["type"].append("damageOut")
+        jsondata["amount"].append(amount)
+        jsondata["pilotName"].append(pilot)
+        jsondata["shipType"].append(ship)
+        jsondata["weaponType"].append(weapon)
 
     if _logLanguageXML[language]["damageIn"] in line:
-       if debug:
-          print("damageIn") 
-       b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]       
-       amount = b_tags[DamageMask_amount] if len(b_tags) > DamageMask_amount else None
-       ship   = b_tags[DamageMask_ship] if len(b_tags) > DamageMask_ship else None
-       pilot  = b_tags[DamageMask_pilot] if len(b_tags) > DamageMask_pilot else None
-       ship = ship.rsplit("(", 1)[1].rstrip(")") 
-       pilot = pilot.split("[", 1)[0]
-       if debug:
-          for b in soup.find_all("b"):
-             print(b.get_text(strip=True))
-       weapon = None
-       match = re.search(DamageRegex, line)
-       if match:
-          weapon = match.group(1).strip()
-       jsondata["type"].append("damageIn")
-       jsondata["amount"].append(amount)
-       jsondata["pilotName"].append(pilot)
-       jsondata["shipType"].append(ship)
-       jsondata["weaponType"].append(weapon)
- 
-########## LOGI OUT
- 
+        if debug:
+            print("damageIn")
+        b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]
+        amount = b_tags[DamageMask_amount] if len(
+            b_tags) > DamageMask_amount else None
+        ship = b_tags[DamageMask_ship] if len(
+            b_tags) > DamageMask_ship else None
+        pilot = b_tags[DamageMask_pilot] if len(
+            b_tags) > DamageMask_pilot else None
+        ship = ship.rsplit("(", 1)[1].rstrip(")")
+        pilot = pilot.split("[", 1)[0]
+        if debug:
+            for b in soup.find_all("b"):
+                print(b.get_text(strip=True))
+        weapon = None
+        match = re.search(DamageRegex, line)
+        if match:
+            weapon = match.group(1).strip()
+        jsondata["type"].append("damageIn")
+        jsondata["amount"].append(amount)
+        jsondata["pilotName"].append(pilot)
+        jsondata["shipType"].append(ship)
+        jsondata["weaponType"].append(weapon)
+
+# LOGI OUT
+
     if _logLanguageXML[language]["shieldBoostedOut"] in line:
-       if debug:
-          print("shieldBoostedOut") 
-       b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]       
-       amount = b_tags[OtherMask_amount] if len(b_tags) > OtherMask_amount else None
-       ship   = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
-       pilot  = b_tags[OtherMask_pilot] if len(b_tags) > OtherMask_pilot else None
-       if debug:
-          for b in soup.find_all("b"):
-             print(b.get_text(strip=True))
-       weapon = None
-       match = re.search(OtherRegex, line)
-       if match:
-          weapon = match.group(1).strip()
-       jsondata["type"].append("shieldBoostedOut")
-       jsondata["amount"].append(amount)
-       jsondata["pilotName"].append(pilot)
-       jsondata["shipType"].append(ship)
-       jsondata["weaponType"].append(weapon)
+        if debug:
+            print("shieldBoostedOut")
+        b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]
+        amount = b_tags[OtherMask_amount] if len(
+            b_tags) > OtherMask_amount else None
+        ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        pilot = b_tags[OtherMask_pilot] if len(
+            b_tags) > OtherMask_pilot else None
+        if debug:
+            for b in soup.find_all("b"):
+                print(b.get_text(strip=True))
+        weapon = None
+        match = re.search(OtherRegex, line)
+        if match:
+            weapon = match.group(1).strip()
+        jsondata["type"].append("shieldBoostedOut")
+        jsondata["amount"].append(amount)
+        jsondata["pilotName"].append(pilot)
+        jsondata["shipType"].append(ship)
+        jsondata["weaponType"].append(weapon)
 
     if _logLanguageXML[language]["armorRepairedOut"] in line:
-       if debug:
-          print("armorRepairedOut") 
-       b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]       
-       amount = b_tags[OtherMask_amount] if len(b_tags) > OtherMask_amount else None
-       ship   = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
-       pilot  = b_tags[OtherMask_pilot] if len(b_tags) > OtherMask_pilot else None
-       if debug:
-          for b in soup.find_all("b"):
-             print(b.get_text(strip=True))
-       weapon = None
-       match = re.search(OtherRegex, line)
-       if match:
-          weapon = match.group(1).strip()
-       jsondata["type"].append("armorRepairedOut")
-       jsondata["amount"].append(amount)
-       jsondata["pilotName"].append(pilot)
-       jsondata["shipType"].append(ship)
-       jsondata["weaponType"].append(weapon)
+        if debug:
+            print("armorRepairedOut")
+        b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]
+        amount = b_tags[OtherMask_amount] if len(
+            b_tags) > OtherMask_amount else None
+        ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        pilot = b_tags[OtherMask_pilot] if len(
+            b_tags) > OtherMask_pilot else None
+        if debug:
+            for b in soup.find_all("b"):
+                print(b.get_text(strip=True))
+        weapon = None
+        match = re.search(OtherRegex, line)
+        if match:
+            weapon = match.group(1).strip()
+        jsondata["type"].append("armorRepairedOut")
+        jsondata["amount"].append(amount)
+        jsondata["pilotName"].append(pilot)
+        jsondata["shipType"].append(ship)
+        jsondata["weaponType"].append(weapon)
 
-    ## hull not tested
+    # hull not tested
     if _logLanguageXML[language]["hullRepairedOut"] in line:
-       if debug:
-          print("hullRepairedOut") 
-       b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]       
-       amount = b_tags[OtherMask_amount] if len(b_tags) > OtherMask_amount else None
-       ship   = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
-       pilot  = b_tags[OtherMask_pilot] if len(b_tags) > OtherMask_pilot else None
-       if debug:
-          for b in soup.find_all("b"):
-             print(b.get_text(strip=True))
-       weapon = None
-       match = re.search(OtherRegex, line)
-       if match:
-          weapon = match.group(1).strip()
-       jsondata["type"].append("hullRepairedOut")
-       jsondata["amount"].append(amount)
-       jsondata["pilotName"].append(pilot)
-       jsondata["shipType"].append(ship)
-       jsondata["weaponType"].append(weapon)
+        if debug:
+            print("hullRepairedOut")
+        b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]
+        amount = b_tags[OtherMask_amount] if len(
+            b_tags) > OtherMask_amount else None
+        ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        pilot = b_tags[OtherMask_pilot] if len(
+            b_tags) > OtherMask_pilot else None
+        if debug:
+            for b in soup.find_all("b"):
+                print(b.get_text(strip=True))
+        weapon = None
+        match = re.search(OtherRegex, line)
+        if match:
+            weapon = match.group(1).strip()
+        jsondata["type"].append("hullRepairedOut")
+        jsondata["amount"].append(amount)
+        jsondata["pilotName"].append(pilot)
+        jsondata["shipType"].append(ship)
+        jsondata["weaponType"].append(weapon)
 
- ########## LOGI IN
- 
+  # LOGI IN
+
     if _logLanguageXML[language]["shieldBoostedIn"] in line:
-       if debug:
-          print("shieldBoostedIn") 
-       b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]       
-       amount = b_tags[OtherMask_amount] if len(b_tags) > OtherMask_amount else None
-       ship   = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
-       pilot  = b_tags[OtherMask_pilot] if len(b_tags) > OtherMask_pilot else None
-       if debug:
-          for b in soup.find_all("b"):
-             print(b.get_text(strip=True))
-       weapon = None
-       match = re.search(OtherRegex, line)
-       if match:
-          weapon = match.group(1).strip()
-       jsondata["type"].append("shieldBoostedIn")
-       jsondata["amount"].append(amount)
-       jsondata["pilotName"].append(pilot)
-       jsondata["shipType"].append(ship)
-       jsondata["weaponType"].append(weapon)
+        if debug:
+            print("shieldBoostedIn")
+        b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]
+        amount = b_tags[OtherMask_amount] if len(
+            b_tags) > OtherMask_amount else None
+        ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        pilot = b_tags[OtherMask_pilot] if len(
+            b_tags) > OtherMask_pilot else None
+        if debug:
+            for b in soup.find_all("b"):
+                print(b.get_text(strip=True))
+        weapon = None
+        match = re.search(OtherRegex, line)
+        if match:
+            weapon = match.group(1).strip()
+        jsondata["type"].append("shieldBoostedIn")
+        jsondata["amount"].append(amount)
+        jsondata["pilotName"].append(pilot)
+        jsondata["shipType"].append(ship)
+        jsondata["weaponType"].append(weapon)
 
     if _logLanguageXML[language]["armorRepairedIn"] in line:
-       if debug:
-          print("armorRepairedIn")            
-       b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]       
-       amount = b_tags[OtherMask_amount] if len(b_tags) > OtherMask_amount else None
-       ship   = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
-       pilot  = b_tags[OtherMask_pilot] if len(b_tags) > OtherMask_pilot else None
-       if debug:
-          for b in soup.find_all("b"):
-             print(b.get_text(strip=True))
-       weapon = None
-       match = re.search(OtherRegex, line)
-       if match:
-          weapon = match.group(1).strip()
-       jsondata["type"].append("armorRepairedIn")
-       jsondata["amount"].append(amount)
-       jsondata["pilotName"].append(pilot)
-       jsondata["shipType"].append(ship)
-       jsondata["weaponType"].append(weapon)
+        if debug:
+            print("armorRepairedIn")
+        b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]
+        amount = b_tags[OtherMask_amount] if len(
+            b_tags) > OtherMask_amount else None
+        ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        pilot = b_tags[OtherMask_pilot] if len(
+            b_tags) > OtherMask_pilot else None
+        if debug:
+            for b in soup.find_all("b"):
+                print(b.get_text(strip=True))
+        weapon = None
+        match = re.search(OtherRegex, line)
+        if match:
+            weapon = match.group(1).strip()
+        jsondata["type"].append("armorRepairedIn")
+        jsondata["amount"].append(amount)
+        jsondata["pilotName"].append(pilot)
+        jsondata["shipType"].append(ship)
+        jsondata["weaponType"].append(weapon)
 
-    ## hull not tested
+    # hull not tested
     if _logLanguageXML[language]["hullRepairedIn"] in line:
-       if debug:
-          print("hullRepairedIn") 
-       b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]       
-       amount = b_tags[OtherMask_amount] if len(b_tags) > OtherMask_amount else None
-       ship   = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
-       pilot  = b_tags[OtherMask_pilot] if len(b_tags) > OtherMask_pilot else None
-       if debug:
-          for b in soup.find_all("b"):
-             print(b.get_text(strip=True))
-       weapon = None
-       match = re.search(OtherRegex, line)
-       if match:
-          weapon = match.group(1).strip()
-       jsondata["type"].append("hullRepairedIn")
-       jsondata["amount"].append(amount)
-       jsondata["pilotName"].append(pilot)
-       jsondata["shipType"].append(ship)
-       jsondata["weaponType"].append(weapon)
+        if debug:
+            print("hullRepairedIn")
+        b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]
+        amount = b_tags[OtherMask_amount] if len(
+            b_tags) > OtherMask_amount else None
+        ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        pilot = b_tags[OtherMask_pilot] if len(
+            b_tags) > OtherMask_pilot else None
+        if debug:
+            for b in soup.find_all("b"):
+                print(b.get_text(strip=True))
+        weapon = None
+        match = re.search(OtherRegex, line)
+        if match:
+            weapon = match.group(1).strip()
+        jsondata["type"].append("hullRepairedIn")
+        jsondata["amount"].append(amount)
+        jsondata["pilotName"].append(pilot)
+        jsondata["shipType"].append(ship)
+        jsondata["weaponType"].append(weapon)
 
-########## Energy Neutralziers
+# Energy Neutralziers
 
-    if (_logLanguageXML[language]["capNeutralizedOut"] in line and capNeutralizedOutColor in line):
-       if debug:
-          print("capNeutralizedOut") 
-       b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]       
-       amount = b_tags[OtherMask_amount] if len(b_tags) > OtherMask_amount else None
-       ship   = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
-       pilot  = b_tags[OtherMask_pilot] if len(b_tags) > OtherMask_pilot else None
-       if debug:
-          for b in soup.find_all("b"):
-             print(b.get_text(strip=True))
-       weapon = None
-       match = re.search(OtherRegex, line)
-       if match:
-          weapon = match.group(1).strip()
-       jsondata["type"].append("capNeutralizedOut")
-       amount = "".join(ch for ch in amount if ch.isdigit())
-       jsondata["amount"].append(amount)
-       jsondata["pilotName"].append(pilot)
-       jsondata["shipType"].append(ship)
-       jsondata["weaponType"].append(weapon)
+    if (_logLanguageXML[language]["capNeutralizedOut"]
+            in line and capNeutralizedOutColor in line):
+        if debug:
+            print("capNeutralizedOut")
+        b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]
+        amount = b_tags[OtherMask_amount] if len(
+            b_tags) > OtherMask_amount else None
+        ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        pilot = b_tags[OtherMask_pilot] if len(
+            b_tags) > OtherMask_pilot else None
+        if debug:
+            for b in soup.find_all("b"):
+                print(b.get_text(strip=True))
+        weapon = None
+        match = re.search(OtherRegex, line)
+        if match:
+            weapon = match.group(1).strip()
+        jsondata["type"].append("capNeutralizedOut")
+        amount = "".join(ch for ch in amount if ch.isdigit())
+        jsondata["amount"].append(amount)
+        jsondata["pilotName"].append(pilot)
+        jsondata["shipType"].append(ship)
+        jsondata["weaponType"].append(weapon)
+
+    if (_logLanguageXML[language]["capNeutralizedIn"]
+            in line and capNeutralizedInColor in line):
+        if debug:
+            print("capNeutralizedIn")
+        b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]
+        amount = b_tags[OtherMask_amount] if len(
+            b_tags) > OtherMask_amount else None
+        ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        pilot = b_tags[OtherMask_pilot] if len(
+            b_tags) > OtherMask_pilot else None
+        if debug:
+            for b in soup.find_all("b"):
+                print(b.get_text(strip=True))
+        weapon = None
+        match = re.search(OtherRegex, line)
+        if match:
+            weapon = match.group(1).strip()
+        jsondata["type"].append("capNeutralizedIn")
+        amount = "".join(ch for ch in amount if ch.isdigit())
+        jsondata["amount"].append(amount)
+        jsondata["pilotName"].append(pilot)
+        jsondata["shipType"].append(ship)
+        jsondata["weaponType"].append(weapon)
 
 
-    if (_logLanguageXML[language]["capNeutralizedIn"] in line and capNeutralizedInColor in line):
-       if debug:
-          print("capNeutralizedIn")
-       b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]       
-       amount = b_tags[OtherMask_amount] if len(b_tags) > OtherMask_amount else None
-       ship   = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
-       pilot  = b_tags[OtherMask_pilot] if len(b_tags) > OtherMask_pilot else None
-       if debug:
-          for b in soup.find_all("b"):
-             print(b.get_text(strip=True))
-       weapon = None
-       match = re.search(OtherRegex, line)
-       if match:
-          weapon = match.group(1).strip()
-       jsondata["type"].append("capNeutralizedIn")
-       amount = "".join(ch for ch in amount if ch.isdigit())
-       jsondata["amount"].append(amount)
-       jsondata["pilotName"].append(pilot)
-       jsondata["shipType"].append(ship)
-       jsondata["weaponType"].append(weapon)
-
-
-########## Energy Neutralziers
-
+# Energy Neutralziers
 
     if _logLanguageXML[language]["nosRecieved"] in line:
-       if debug:
-          print("nosRecieved")              
-       b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]       
-       amount = b_tags[OtherMask_amount] if len(b_tags) > OtherMask_amount else None
-       ship   = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
-       pilot  = b_tags[OtherMask_pilot] if len(b_tags) > OtherMask_pilot else None
-       if debug:
-          for b in soup.find_all("b"):
-             print(b.get_text(strip=True))
-       weapon = None
-       match = re.search(OtherRegex, line)
-       if match:
-          weapon = match.group(1).strip()
-       jsondata["type"].append("nosRecieved")
-       amount = "".join(ch for ch in amount if ch.isdigit())
-       jsondata["amount"].append(amount)
-       jsondata["pilotName"].append(pilot)
-       jsondata["shipType"].append(ship)
-       jsondata["weaponType"].append(weapon)
-       
-       
+        if debug:
+            print("nosRecieved")
+        b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]
+        amount = b_tags[OtherMask_amount] if len(
+            b_tags) > OtherMask_amount else None
+        ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        pilot = b_tags[OtherMask_pilot] if len(
+            b_tags) > OtherMask_pilot else None
+        if debug:
+            for b in soup.find_all("b"):
+                print(b.get_text(strip=True))
+        weapon = None
+        match = re.search(OtherRegex, line)
+        if match:
+            weapon = match.group(1).strip()
+        jsondata["type"].append("nosRecieved")
+        amount = "".join(ch for ch in amount if ch.isdigit())
+        jsondata["amount"].append(amount)
+        jsondata["pilotName"].append(pilot)
+        jsondata["shipType"].append(ship)
+        jsondata["weaponType"].append(weapon)
+
     if _logLanguageXML[language]["nosTaken"] in line:
-       if debug:
-          print("nosTaken") 
-       b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]       
-       amount = b_tags[OtherMask_amount] if len(b_tags) > OtherMask_amount else None
-       ship   = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
-       pilot  = b_tags[OtherMask_pilot] if len(b_tags) > OtherMask_pilot else None
-       if debug:
-          for b in soup.find_all("b"):
-             print(b.get_text(strip=True))
-       weapon = None
-       match = re.search(OtherRegex, line)
-       if match:
-          weapon = match.group(1).strip()
-       jsondata["type"].append("nosTaken")
-       amount = "".join(ch for ch in amount if ch.isdigit())
-       jsondata["amount"].append(amount)
-       jsondata["pilotName"].append(pilot)
-       jsondata["shipType"].append(ship)
-       jsondata["weaponType"].append(weapon)
-       
+        if debug:
+            print("nosTaken")
+        b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]
+        amount = b_tags[OtherMask_amount] if len(
+            b_tags) > OtherMask_amount else None
+        ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        pilot = b_tags[OtherMask_pilot] if len(
+            b_tags) > OtherMask_pilot else None
+        if debug:
+            for b in soup.find_all("b"):
+                print(b.get_text(strip=True))
+        weapon = None
+        match = re.search(OtherRegex, line)
+        if match:
+            weapon = match.group(1).strip()
+        jsondata["type"].append("nosTaken")
+        amount = "".join(ch for ch in amount if ch.isdigit())
+        jsondata["amount"].append(amount)
+        jsondata["pilotName"].append(pilot)
+        jsondata["shipType"].append(ship)
+        jsondata["weaponType"].append(weapon)
 
-########## Energy Transfers
 
+# Energy Transfers
 
     if _logLanguageXML[language]["capTransferedOut"] in line:
-       if debug:
-          print("capTransferedOut") 
-       b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]       
-       amount = b_tags[OtherMask_amount] if len(b_tags) > OtherMask_amount else None
-       ship   = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
-       pilot  = b_tags[OtherMask_pilot] if len(b_tags) > OtherMask_pilot else None
-       if debug:
-          for b in soup.find_all("b"):
-             print(b.get_text(strip=True))
-       weapon = None
-       match = re.search(OtherRegex, line)
-       if match:
-          weapon = match.group(1).strip()
-       jsondata["type"].append("capTransferedOut")
-       amount = "".join(ch for ch in amount if ch.isdigit())
-       jsondata["amount"].append(amount)
-       jsondata["pilotName"].append(pilot)
-       jsondata["shipType"].append(ship)
-       jsondata["weaponType"].append(weapon)
- 
+        if debug:
+            print("capTransferedOut")
+        b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]
+        amount = b_tags[OtherMask_amount] if len(
+            b_tags) > OtherMask_amount else None
+        ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        pilot = b_tags[OtherMask_pilot] if len(
+            b_tags) > OtherMask_pilot else None
+        if debug:
+            for b in soup.find_all("b"):
+                print(b.get_text(strip=True))
+        weapon = None
+        match = re.search(OtherRegex, line)
+        if match:
+            weapon = match.group(1).strip()
+        jsondata["type"].append("capTransferedOut")
+        amount = "".join(ch for ch in amount if ch.isdigit())
+        jsondata["amount"].append(amount)
+        jsondata["pilotName"].append(pilot)
+        jsondata["shipType"].append(ship)
+        jsondata["weaponType"].append(weapon)
 
     if _logLanguageXML[language]["capTransferedIn"] in line:
-       if debug:
-          print("capTransferedIn") 
-       b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]       
-       amount = b_tags[OtherMask_amount] if len(b_tags) > OtherMask_amount else None
-       ship   = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
-       pilot  = b_tags[OtherMask_pilot] if len(b_tags) > OtherMask_pilot else None
-       if debug:
-          for b in soup.find_all("b"):
-             print(b.get_text(strip=True))
-       weapon = None
-       match = re.search(OtherRegex, line)
-       if match:
-          weapon = match.group(1).strip()
-       jsondata["type"].append("capTransferedIn")
-       amount = "".join(ch for ch in amount if ch.isdigit())
-       jsondata["amount"].append(amount)
-       jsondata["pilotName"].append(pilot)
-       jsondata["shipType"].append(ship)
-       jsondata["weaponType"].append(weapon)
-       
-
-
- 
+        if debug:
+            print("capTransferedIn")
+        b_tags = [b.get_text(strip=True) for b in soup.find_all("b")]
+        amount = b_tags[OtherMask_amount] if len(
+            b_tags) > OtherMask_amount else None
+        ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        pilot = b_tags[OtherMask_pilot] if len(
+            b_tags) > OtherMask_pilot else None
+        if debug:
+            for b in soup.find_all("b"):
+                print(b.get_text(strip=True))
+        weapon = None
+        match = re.search(OtherRegex, line)
+        if match:
+            weapon = match.group(1).strip()
+        jsondata["type"].append("capTransferedIn")
+        amount = "".join(ch for ch in amount if ch.isdigit())
+        jsondata["amount"].append(amount)
+        jsondata["pilotName"].append(pilot)
+        jsondata["shipType"].append(ship)
+        jsondata["weaponType"].append(weapon)
 
     if debug:
-       print(jsondata) 
-    if (send_post_query and len(jsondata["type"])>0):
-       await send_influxdb_metric( session=session, tags={"char": my_char.replace(" ","\\ "), "pilotName": jsondata["pilotName"][0].replace(" ","\\ "), "shipType": jsondata["shipType"][0].replace(" ","\\ "), "weaponType": jsondata["weaponType"][0].replace(" ","\\ ")}, field=jsondata["type"][0], value=jsondata["amount"][0] )
+        print(jsondata)
+    if (send_post_query and len(jsondata["type"]) > 0):
+        await send_influxdb_metric(session=session, tags={"char": my_char.replace(" ", "\\ "), "pilotName": jsondata["pilotName"][0].replace(" ", "\\ "), "shipType": jsondata["shipType"][0].replace(" ", "\\ "), "weaponType": jsondata["weaponType"][0].replace(" ", "\\ ")}, field=jsondata["type"][0], value=jsondata["amount"][0])
 
 
-
- 
 async def async_main():
     print("     ")
     print("     VER 2.03 23.08.2025")
     print("     ")
-    
-    #hours = int(input("Enter the maximum age of logs in hours (N): "))
+
+    # hours = int(input("Enter the maximum age of logs in hours (N): "))
     logs = get_recent_logs(directory, hours)
     if not logs:
         print("No matching logs found.")
         return
-      
+
     logs.sort(key=lambda x: x[1], reverse=True)
-    
+
     print("\nAvailable logs (not older than {} hours):".format(hours))
     for i, (log_path, mtime) in enumerate(logs, 1):
         header = extract_header(log_path)
         first_line = header if header else "No header"
         date_str = datetime.fromtimestamp(mtime).strftime('%Y.%m.%d %H:%M:%S')
         print(f"{i} - {first_line}")
-    
+
     choice = int(input("\nSelect log number (0 to exit): "))
     if 1 <= choice <= len(logs):
-        selected_log = logs[choice-1][0]
+        selected_log = logs[choice - 1][0]
         print(f"\nStart:\n")
         my_char = ""
         with open(selected_log, 'r', encoding='utf-8') as f:
             for line_num, line in enumerate(f, 1):
                 if not line.strip():
                     continue
-                ind = line.find(_logLanguageXML[language]["listener"]+":")
+                ind = line.find(_logLanguageXML[language]["listener"] + ":")
                 if ind != -1:
-                    my_char = line[ind+10:]
+                    my_char = line[ind + 10:]
                     my_char = my_char.strip()
-        file_size = os.path.getsize(selected_log)    
+        file_size = os.path.getsize(selected_log)
         last_position = file_size
-        #last_position = 0
-        
+        # last_position = 0
+
         async with aiohttp.ClientSession() as session:
-        
+
             while True:
                 try:
                     file_size = os.path.getsize(selected_log)
@@ -665,12 +697,14 @@ async def async_main():
                                 await process_log_line_xml(session, line.strip(), my_char)
                 except Exception as e:
                     print(f"Error reading file: {e}")
-                await asyncio.sleep(50/1000)
+                await asyncio.sleep(50 / 1000)
     elif choice != 0:
         print("Wrong choice.")
-        
-        
+
+
 def main():
     asyncio.run(async_main())
+
+
 if __name__ == "__main__":
     main()
