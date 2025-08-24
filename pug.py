@@ -192,7 +192,8 @@ _LanguageFilter = {
         1: ">Warp disruption attempt<"
     },
     'russian': {
-
+        0: ">Попытка варп-подавления:<",
+        1: ">Попытка варп-глушения:<"
     },
     'french': {
 
@@ -277,6 +278,12 @@ def is_number(string):
 async def process_log_line_xml(session, line, my_char):
     if not line.strip():
         return
+
+# Simple Filter
+    for i in range(len(_LanguageFilter[language])):
+        if _LanguageFilter[language][i] in line:
+            return
+            
     if marker in line:
         line = line.split(marker, 1)[1]
         line = line.strip()
@@ -295,12 +302,6 @@ async def process_log_line_xml(session, line, my_char):
         "weaponType": [],
     }
 
-# Simple Filter
-    for i in range(len(_LanguageFilter[language])):
-        if _LanguageFilter[language][i] in line:
-            return
-
-
 # DAMAGE
 
     if _logLanguageXML[language]["damageOut"] in line:
@@ -314,6 +315,7 @@ async def process_log_line_xml(session, line, my_char):
         pilot = b_tags[DamageMask_pilot] if len(
             b_tags) > DamageMask_pilot else None
         ship = ship.rsplit("(", 1)[1].rstrip(")")
+        ship = ship.replace("*","")        
         pilot = pilot.split("[", 1)[0]
         if debug:
             for b in soup.find_all("b"):
@@ -322,6 +324,8 @@ async def process_log_line_xml(session, line, my_char):
         match = re.search(DamageRegex, line)
         if match:
             weapon = match.group(1).strip()
+            if "localized hint" in weapon:
+                weapon = weapon.split('>')[1].split('<')[0].rstrip('*')
         jsondata["type"].append("damageOut")
         jsondata["amount"].append(amount)
         jsondata["pilotName"].append(pilot)
@@ -340,8 +344,7 @@ async def process_log_line_xml(session, line, my_char):
             b_tags) > DamageMask_pilot else None
         if ("(" in ship and ")" in ship):
             ship = ship.rsplit("(", 1)[1].rstrip(")")
-        else:
-            None
+        ship = ship.replace("*","")
         pilot = pilot.split("[", 1)[0]
         if debug:
             for b in soup.find_all("b"):
@@ -350,6 +353,8 @@ async def process_log_line_xml(session, line, my_char):
         match = re.search(DamageRegex, line)
         if match:
             weapon = match.group(1).strip()
+            if "localized hint" in weapon:
+                weapon = weapon.split('>')[1].split('<')[0].rstrip('*')
         jsondata["type"].append("damageIn")
         jsondata["amount"].append(amount)
         jsondata["pilotName"].append(pilot)
@@ -365,6 +370,7 @@ async def process_log_line_xml(session, line, my_char):
         amount = b_tags[OtherMask_amount] if len(
             b_tags) > OtherMask_amount else None
         ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        ship = ship.replace("*","")
         pilot = b_tags[OtherMask_pilot] if len(
             b_tags) > OtherMask_pilot else None
         if debug:
@@ -374,6 +380,8 @@ async def process_log_line_xml(session, line, my_char):
         match = re.search(OtherRegex, line)
         if match:
             weapon = match.group(1).strip()
+            if "localized hint" in weapon:
+                weapon = weapon.split('>')[1].split('<')[0].rstrip('*')
         jsondata["type"].append("shieldBoostedOut")
         jsondata["amount"].append(amount)
         jsondata["pilotName"].append(pilot)
@@ -387,6 +395,7 @@ async def process_log_line_xml(session, line, my_char):
         amount = b_tags[OtherMask_amount] if len(
             b_tags) > OtherMask_amount else None
         ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        ship = ship.replace("*","")
         pilot = b_tags[OtherMask_pilot] if len(
             b_tags) > OtherMask_pilot else None
         if debug:
@@ -396,6 +405,8 @@ async def process_log_line_xml(session, line, my_char):
         match = re.search(OtherRegex, line)
         if match:
             weapon = match.group(1).strip()
+            if "localized hint" in weapon:
+                weapon = weapon.split('>')[1].split('<')[0].rstrip('*')
         jsondata["type"].append("armorRepairedOut")
         jsondata["amount"].append(amount)
         jsondata["pilotName"].append(pilot)
@@ -410,6 +421,7 @@ async def process_log_line_xml(session, line, my_char):
         amount = b_tags[OtherMask_amount] if len(
             b_tags) > OtherMask_amount else None
         ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        ship = ship.replace("*","")
         pilot = b_tags[OtherMask_pilot] if len(
             b_tags) > OtherMask_pilot else None
         if debug:
@@ -419,6 +431,8 @@ async def process_log_line_xml(session, line, my_char):
         match = re.search(OtherRegex, line)
         if match:
             weapon = match.group(1).strip()
+            if "localized hint" in weapon:
+                weapon = weapon.split('>')[1].split('<')[0].rstrip('*')
         jsondata["type"].append("hullRepairedOut")
         jsondata["amount"].append(amount)
         jsondata["pilotName"].append(pilot)
@@ -434,6 +448,7 @@ async def process_log_line_xml(session, line, my_char):
         amount = b_tags[OtherMask_amount] if len(
             b_tags) > OtherMask_amount else None
         ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        ship = ship.replace("*","")
         pilot = b_tags[OtherMask_pilot] if len(
             b_tags) > OtherMask_pilot else None
         if debug:
@@ -443,6 +458,8 @@ async def process_log_line_xml(session, line, my_char):
         match = re.search(OtherRegex, line)
         if match:
             weapon = match.group(1).strip()
+            if "localized hint" in weapon:
+                weapon = weapon.split('>')[1].split('<')[0].rstrip('*')
         jsondata["type"].append("shieldBoostedIn")
         jsondata["amount"].append(amount)
         jsondata["pilotName"].append(pilot)
@@ -456,6 +473,7 @@ async def process_log_line_xml(session, line, my_char):
         amount = b_tags[OtherMask_amount] if len(
             b_tags) > OtherMask_amount else None
         ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        ship = ship.replace("*","")
         pilot = b_tags[OtherMask_pilot] if len(
             b_tags) > OtherMask_pilot else None
         if debug:
@@ -465,6 +483,8 @@ async def process_log_line_xml(session, line, my_char):
         match = re.search(OtherRegex, line)
         if match:
             weapon = match.group(1).strip()
+            if "localized hint" in weapon:
+                weapon = weapon.split('>')[1].split('<')[0].rstrip('*')
         jsondata["type"].append("armorRepairedIn")
         jsondata["amount"].append(amount)
         jsondata["pilotName"].append(pilot)
@@ -479,6 +499,7 @@ async def process_log_line_xml(session, line, my_char):
         amount = b_tags[OtherMask_amount] if len(
             b_tags) > OtherMask_amount else None
         ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        ship = ship.replace("*","")
         pilot = b_tags[OtherMask_pilot] if len(
             b_tags) > OtherMask_pilot else None
         if debug:
@@ -488,6 +509,8 @@ async def process_log_line_xml(session, line, my_char):
         match = re.search(OtherRegex, line)
         if match:
             weapon = match.group(1).strip()
+            if "localized hint" in weapon:
+                weapon = weapon.split('>')[1].split('<')[0].rstrip('*')
         jsondata["type"].append("hullRepairedIn")
         jsondata["amount"].append(amount)
         jsondata["pilotName"].append(pilot)
@@ -504,6 +527,7 @@ async def process_log_line_xml(session, line, my_char):
         amount = b_tags[OtherMask_amount] if len(
             b_tags) > OtherMask_amount else None
         ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        ship = ship.replace("*","")
         pilot = b_tags[OtherMask_pilot] if len(
             b_tags) > OtherMask_pilot else None
         if debug:
@@ -513,6 +537,8 @@ async def process_log_line_xml(session, line, my_char):
         match = re.search(OtherRegex, line)
         if match:
             weapon = match.group(1).strip()
+            if "localized hint" in weapon:
+                weapon = weapon.split('>')[1].split('<')[0].rstrip('*')
         jsondata["type"].append("capNeutralizedOut")
         amount = "".join(ch for ch in amount if ch.isdigit())
         jsondata["amount"].append(amount)
@@ -528,6 +554,7 @@ async def process_log_line_xml(session, line, my_char):
         amount = b_tags[OtherMask_amount] if len(
             b_tags) > OtherMask_amount else None
         ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        ship = ship.replace("*","")
         pilot = b_tags[OtherMask_pilot] if len(
             b_tags) > OtherMask_pilot else None
         if debug:
@@ -537,6 +564,8 @@ async def process_log_line_xml(session, line, my_char):
         match = re.search(OtherRegex, line)
         if match:
             weapon = match.group(1).strip()
+            if "localized hint" in weapon:
+                weapon = weapon.split('>')[1].split('<')[0].rstrip('*')
         jsondata["type"].append("capNeutralizedIn")
         amount = "".join(ch for ch in amount if ch.isdigit())
         jsondata["amount"].append(amount)
@@ -554,6 +583,7 @@ async def process_log_line_xml(session, line, my_char):
         amount = b_tags[OtherMask_amount] if len(
             b_tags) > OtherMask_amount else None
         ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        ship = ship.replace("*","")
         pilot = b_tags[OtherMask_pilot] if len(
             b_tags) > OtherMask_pilot else None
         if debug:
@@ -563,6 +593,8 @@ async def process_log_line_xml(session, line, my_char):
         match = re.search(OtherRegex, line)
         if match:
             weapon = match.group(1).strip()
+            if "localized hint" in weapon:
+                weapon = weapon.split('>')[1].split('<')[0].rstrip('*')
         jsondata["type"].append("nosRecieved")
         amount = "".join(ch for ch in amount if ch.isdigit())
         jsondata["amount"].append(amount)
@@ -577,6 +609,7 @@ async def process_log_line_xml(session, line, my_char):
         amount = b_tags[OtherMask_amount] if len(
             b_tags) > OtherMask_amount else None
         ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        ship = ship.replace("*","")
         pilot = b_tags[OtherMask_pilot] if len(
             b_tags) > OtherMask_pilot else None
         if debug:
@@ -586,6 +619,8 @@ async def process_log_line_xml(session, line, my_char):
         match = re.search(OtherRegex, line)
         if match:
             weapon = match.group(1).strip()
+            if "localized hint" in weapon:
+                weapon = weapon.split('>')[1].split('<')[0].rstrip('*')
         jsondata["type"].append("nosTaken")
         amount = "".join(ch for ch in amount if ch.isdigit())
         jsondata["amount"].append(amount)
@@ -603,6 +638,7 @@ async def process_log_line_xml(session, line, my_char):
         amount = b_tags[OtherMask_amount] if len(
             b_tags) > OtherMask_amount else None
         ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        ship = ship.replace("*","")
         pilot = b_tags[OtherMask_pilot] if len(
             b_tags) > OtherMask_pilot else None
         if debug:
@@ -612,6 +648,8 @@ async def process_log_line_xml(session, line, my_char):
         match = re.search(OtherRegex, line)
         if match:
             weapon = match.group(1).strip()
+            if "localized hint" in weapon:
+                weapon = weapon.split('>')[1].split('<')[0].rstrip('*')
         jsondata["type"].append("capTransferedOut")
         amount = "".join(ch for ch in amount if ch.isdigit())
         jsondata["amount"].append(amount)
@@ -626,6 +664,7 @@ async def process_log_line_xml(session, line, my_char):
         amount = b_tags[OtherMask_amount] if len(
             b_tags) > OtherMask_amount else None
         ship = b_tags[OtherMask_ship] if len(b_tags) > OtherMask_ship else None
+        ship = ship.replace("*","")
         pilot = b_tags[OtherMask_pilot] if len(
             b_tags) > OtherMask_pilot else None
         if debug:
@@ -635,6 +674,8 @@ async def process_log_line_xml(session, line, my_char):
         match = re.search(OtherRegex, line)
         if match:
             weapon = match.group(1).strip()
+            if "localized hint" in weapon:
+                weapon = weapon.split('>')[1].split('<')[0].rstrip('*')
         jsondata["type"].append("capTransferedIn")
         amount = "".join(ch for ch in amount if ch.isdigit())
         jsondata["amount"].append(amount)
@@ -712,4 +753,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
